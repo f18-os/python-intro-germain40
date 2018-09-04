@@ -1,5 +1,4 @@
 import re
-
 d = {}
 words = []
 fileIn = open("speech.txt", 'r')
@@ -17,3 +16,4 @@ for w in words:
 fileOut = open("outPut.txt", 'w')
 for k, v in d.items():
     fileOut.write(k + " " + str(v) + "\n")
+fileOut.close()
