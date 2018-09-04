@@ -51,7 +51,7 @@ with open(inputFname, 'r') as inputFile:
         # split line on whitespace and punctuation
         word = re.split('[ \t]', line)
         if len(word) != 2:
-            print ("Badly formatted line, exiting. Bad line:\n %s" % line)
+            print("Badly formatted line, exiting. Bad line:\n %s" % line)
             exit()
         master[word[0]] = int(word[1])
         words += 1
