@@ -6,7 +6,7 @@ fileIn = open("speech.txt", 'r')
 # makes everything lower case for case-insensitive
 lfile = fileIn.read().lower()
 # clean the file
-words = re.sub('[^a-zA-Z0-9]', ' ', lfile).split()
+words = re.sub('[^a-zA-Z]', ' ', lfile).split()
 words.sort()
 fileIn.close()
 for w in words:
