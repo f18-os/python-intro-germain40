@@ -4,6 +4,7 @@ import os, sys, time, re, cmd
 
 reply = input('Welcome pls press enter to begin')
 while reply != 'q':
+    print("(<, file) \n(>, file)\n")
     reply = input("q for quit\n")
     pid = os.getpid()
 
@@ -21,15 +22,16 @@ while reply != 'q':
         args = reply.split()
         if args[0] == '<':
             os.close(0) # redirect child's stdin
-            sys.stdin = open("args[1]", "r")
+            file = args[1]
+            sys.stdin = open(file, "r")
             fd = sys.stdin.fileno()
             os.set_inheritable(fd, True)
             args = sys.stdin.read().split()
 
         if args[0] == '>':
-            args = ["wc", "shell.py"]
+            file = args[1]
             os.close(1)  # redirect child's stdout
-            sys.stdout = open("p4-output.txt", "w")
+            sys.stdout = open(file, "w")
             fd = sys.stdout.fileno()  # os.open("p4-output.txt", os.O_CREAT)
             os.set_inheritable(fd, True)
             os.write(2, ("Child: opened fd=%d for writing\n" % fd).encode())
