@@ -19,6 +19,21 @@ while reply != 'q':
         os.write(1, ("Child: My pid==%d.  Parent's pid=%d\n" %
                      (os.getpid(), pid)).encode())
         args = reply.split()
+        if args[0] == '<':
+            os.close(0) # redirect child's stdin
+            sys.stdin = open("args[1]", "r")
+            fd = sys.stdin.fileno()
+            os.set_inheritable(fd, True)
+            args = sys.stdin.read().split()
+
+        if args[0] == '>':
+            args = ["wc", "shell.py"]
+            os.close(1)  # redirect child's stdout
+            sys.stdout = open("p4-output.txt", "w")
+            fd = sys.stdout.fileno()  # os.open("p4-output.txt", os.O_CREAT)
+            os.set_inheritable(fd, True)
+            os.write(2, ("Child: opened fd=%d for writing\n" % fd).encode())
+
         for dir in re.split(":", os.environ['PATH']):  # try each directory in the path
             program = "%s/%s" % (dir, args[0])
             os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
