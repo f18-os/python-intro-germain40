@@ -7,6 +7,8 @@ while loop == True:
     if reply == "exit":
         loop = False
         continue
+    elif reply == "":
+        continue
     pid = os.getpid()
 
     os.write(1, ("About to fork (pid:%d)\n" % pid).encode())
@@ -21,23 +23,24 @@ while loop == True:
         os.write(1, ("Child: My pid==%d.  Parent's pid=%d\n" %
                      (os.getpid(), pid)).encode())
         args = reply.split()
-        if args[1] == '<':
-            os.close(0) # redirect child's stdin
-            file = args[2]
-            sys.stdin = open(file, "r")
-            fd = sys.stdin.fileno()
-            os.set_inheritable(fd, True)
-            args[1] = sys.stdin.read()
+        if len(args) == 3:
+            if args[1] == '<':
+                os.close(0)  # redirect child's stdin
+                file = args[2]
+                sys.stdin = open(file, "r")
+                fd = sys.stdin.fileno()
+                os.set_inheritable(fd, True)
+                args[1] = sys.stdin.read()
 
-        if args[1] == '>':
-            file = args[2]
-            os.close(1)  # redirect child's stdout
-            sys.stdout = open(file, "w")
-            fd = sys.stdout.fileno()  # os.open("p4-output.txt", os.O_CREAT)
-            os.set_inheritable(fd, True)
-            args[1] = file
-            args[2] = file
-            os.write(2, ("Child: opened fd=%d for writing\n" % fd).encode())
+            if args[1] == '>':
+                file = args[2]
+                os.close(1)  # redirect child's stdout
+                sys.stdout = open(file, "w")
+                fd = sys.stdout.fileno()  # os.open("p4-output.txt", os.O_CREAT)
+                os.set_inheritable(fd, True)
+                args[1] = file
+                args[2] = file
+                os.write(2, ("Child: opened fd=%d for writing\n" % fd).encode())
 
 
         for dir in re.split(":", os.environ['PATH']):  # try each directory in the path
