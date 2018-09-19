@@ -3,9 +3,12 @@
 import os, sys, re
 loop = True
 pip = False
+sys.ps1 = os.environ.get('PS1')
+if sys.ps1 is None:
+    sys.ps1 = '$ '
 while loop:
     try:
-        reply = input("$ ")
+        reply = input(sys.ps1)
         if reply == "exit":
             loop = False
             continue
@@ -13,7 +16,7 @@ while loop:
             continue
         pid = os.getpid()
 
-        os.write(1, ("About to fork (pid:%d)\n" % pid).encode())
+        # os.write(1, ("About to fork (pid:%d)\n" % pid).encode())
 
         for a in reply.split():
             if a == '|':
@@ -24,12 +27,11 @@ while loop:
         rc = os.fork()
 
         if rc < 0:
-            os.write(2, ("fork failed, returning %d\n" % rc).encode())
+            # os.write(2, ("fork failed, returning %d\n" % rc).encode())
             sys.exit(1)
 
         elif rc == 0:  # child
-            os.write(1, ("Child: My pid==%d.  Parent's pid=%d\n" %
-                         (os.getpid(), pid)).encode())
+            # os.write(1, ("Child: My pid==%d.  Parent's pid=%d\n" % (os.getpid(), pid)).encode())
             if pip:
                 os.set_inheritable(pr, True)
                 os.set_inheritable(pw, True)
@@ -52,10 +54,12 @@ while loop:
                         if a == '>':
                             os.close(1)  # redirect child's stdout
                             sys.stdout = open(args[position + 1], "w")
+                            del args[position]
+                            args = args[:position]
                             fd = sys.stdout.fileno()  # os.open("p4-output.txt", os.O_CREAT)
                             os.set_inheritable(fd, True)
-                            args[position] = args[position + 1]
-                            os.write(2, ("Child: opened fd=%d for writing\n" % fd).encode())
+
+                            # os.write(2, ("Child: opened fd=%d for writing\n" % fd).encode())
 
                         position += 1
 
@@ -67,8 +71,8 @@ while loop:
                 except FileNotFoundError:  # ...expected
                     pass  # ...fail quietly
 
-            os.write(2, "Command not found\n".encode())
-            os.write(2, ("Child:    Could not exec %s\n" % args[0]).encode())
+            # os.write(2, "Command not found\n".encode())
+            # os.write(2, ("Child:    Could not exec %s\n" % args[0]).encode())
             sys.exit(1)
 
         else:  # parent (forked ok)
@@ -86,13 +90,8 @@ while loop:
                     except FileNotFoundError:  # ...expected
                         pass  # ...fail quietly
                 pip = False
-
-            os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" %
-                         (pid, rc)).encode())
             childPidCode = os.wait()
 
-            os.write(1, ("Parent: Child %d terminated with exit code %d\n" %
-                         childPidCode).encode())
     except EOFError:
             break
     except KeyboardInterrupt:
